@@ -2,6 +2,32 @@
 
 # LinUwUx
 
+> **Fork note:** This fork carries the newer-Artifact loader work from
+> [PR #58](https://github.com/brcly/linuwux-runtime/pull/58) on top of
+> [PR #57](https://github.com/brcly/linuwux-runtime/pull/57).
+>
+> Changes on top of upstream:
+>
+> - [`fda0e86`](https://github.com/sivasdeadknight/linuwux-runtime/commit/fda0e86) —
+>   recognize both `artifact.dll` layouts from their `.text` signatures,
+>   locate the cached `GetProcAddress` by validating the detour chain instead
+>   of a fixed RVA, and repair the newer build's cloned PEB/`PEB_LDR_DATA`
+>   without duplicating Wine's loader nodes. Includes validation and rollback
+>   around the list rewrites, plus four loader unit tests.
+> - [`b3626cd`](https://github.com/sivasdeadknight/linuwux-runtime/commit/b3626cd) —
+>   opt-in AMD Artifact support from PR #57 (base for the change above).
+>
+> Layouts: older `bef24d1e…` (1,157,120 bytes), newer `63bc4a70…`
+> (1,246,720 bytes). Do not mix them.
+>
+> Tested with the newer DLL on a Ryzen 5 5600X (Zen 3, no AVX-512,
+> `XCR0=7`): `cargo test -p linuwux-runtime artifact_amd` passes 4/4, and a
+> 130 s run reached real gameplay with no `c0000409` and no loader deadlock.
+>
+> Scope: this repairs the cloned loader list after the XGETBV gate is passed.
+> Upstream closed PR #58 pending a general AVX-512 solution, so CPUs whose
+> `XCR0` is not 7 still need that separate work.
+
 LinUwUx is a small Linux compatibility runtime for Windows games running through
 Wine or Proton. It uses `LD_PRELOAD` to keep the CPU profile, Windows shared
 system data, clocks, signal handling, and Wine environment consistent across the
